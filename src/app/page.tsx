@@ -9,28 +9,28 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-[calc(100vh-4rem)]">
       {/* Hero Section */}
-      <section className="flex-1 flex flex-col items-center justify-center relative overflow-hidden py-24 bg-white">
-        {/* React Bits GridScan Background */}
+      <section className="flex-1 flex flex-col items-center justify-center relative overflow-hidden py-24 bg-[#060611] text-white">
+        {/* React Bits GridScan Background — Inverted (dark bg, light lines) */}
         <div className="absolute inset-0 z-0">
            <GridScan
              enableWebcam={false}
              showPreview={false}
              lineThickness={2}
-             linesColor="#e5e7eb"
-             scanColor="#0ea5e9"
-             scanOpacity={0.6}
+             linesColor="#1e293b"
+             scanColor="#38bdf8"
+             scanOpacity={0.8}
              gridScale={0.15}
              lineStyle="dashed"
            />
         </div>
 
         {/* Background Gradients */}
-        <div className="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none z-0" />
-        <div className="absolute -top-10 -right-20 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl z-0" />
-        <div className="absolute top-20 -left-20 w-72 h-72 bg-teal-500/10 rounded-full blur-3xl z-0" />
+        <div className="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-sky-500/5 to-transparent pointer-events-none z-0" />
+        <div className="absolute -top-10 -right-20 w-72 h-72 bg-blue-600/15 rounded-full blur-3xl z-0" />
+        <div className="absolute top-20 -left-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl z-0" />
 
         <div className="container px-6 relative z-10 mx-auto text-center max-w-4xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 text-primary text-sm font-semibold mb-8 border border-primary/10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 text-sky-400 text-sm font-semibold mb-8 border border-sky-500/20">
             <ScanLine className="w-4 h-4" />
             <DecryptedText
               text="VLD Pattern Detection Engine v2.0 Live"
@@ -40,19 +40,19 @@ export default function HomePage() {
             />
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-primary mb-8 leading-tight">
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-8 leading-tight">
             Universal Credential <br /> Verification Platform
           </h1>
           
-          <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
-            Instantly issue and verify credentials using Polygon blockchain immutability and our Explainable AI <span className="font-semibold text-primary">Visual Logical Detection (VLD)</span> engine.
+          <p className="text-xl text-sky-100/70 mb-12 max-w-2xl mx-auto leading-relaxed">
+            Instantly issue and verify credentials using Polygon blockchain immutability and our Explainable AI <span className="font-semibold text-sky-400">Visual Logical Detection (VLD)</span> engine.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/verify" className="w-full sm:w-auto px-8 py-4 rounded-xl btn-glass-primary text-lg flex items-center justify-center gap-2">
+            <Link href="/verify" className="w-full sm:w-auto px-8 py-4 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-lg flex items-center justify-center gap-2 transition-colors shadow-lg shadow-sky-500/20">
               Verify Document <FileCheck2 className="w-5 h-5" />
             </Link>
-            <Link href="/issue" className="w-full sm:w-auto px-8 py-4 rounded-xl btn-glass text-lg flex items-center justify-center gap-2">
+            <Link href="/issue" className="w-full sm:w-auto px-8 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white text-lg flex items-center justify-center gap-2 transition-colors">
               Issue Credentials <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
