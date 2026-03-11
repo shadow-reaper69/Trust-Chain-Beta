@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     let certId = data?.id;
 
-    if (error && error.code === '42P01') { 
+    if (error && (error.code === '42P01' || error.code === 'PGRST205')) { 
        // relation does not exist, use legacy table
        const { data: fallbackData, error: fallbackError } = await supabase
          .from('certificates')
@@ -77,7 +77,9 @@ export async function POST(request: NextRequest) {
            document_hash: documentHash,
            blockchain_hash: txHash,
            status: 'active',
-           revoked: false
+           revoked: false,
+           institution_id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+           certificate_type: 'Degree'
          })
          .select('id')
          .single();
