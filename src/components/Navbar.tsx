@@ -18,8 +18,8 @@ export default function Navbar() {
           <Link href="/verify" className="text-muted-foreground hover:text-foreground transition-colors">
             Verify Certificate
           </Link>
-          <Link href="/issue" className="text-muted-foreground hover:text-foreground transition-colors">
-            Issue Credentials
+          <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+            Pricing
           </Link>
           <Link href="/admin" className="text-muted-foreground hover:text-foreground transition-colors">
             Dashboard

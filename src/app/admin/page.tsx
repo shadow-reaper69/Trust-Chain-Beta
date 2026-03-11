@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { ShieldCheck, FileText, AlertTriangle, Users, TrendingUp, Search, ExternalLink } from 'lucide-react';
+import { ShieldCheck, FileText, AlertTriangle, TrendingUp, Search, ExternalLink, LogOut, Crown, Zap, Lock, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 interface Certificate {
   id: string;
@@ -17,19 +19,61 @@ interface Certificate {
   status: string;
 }
 
+interface Session {
+  user: { email: string; name?: string };
+  plan: string;
+  isDemo: boolean;
+  expiresAt?: number;
+}
+
 export default function AdminDashboard() {
-  const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const router = useRouter();
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [search, setSearch] = useState('');
   const [stats, setStats] = useState({ total: 0, active: 0, revoked: 0, verified: 0 });
 
   useEffect(() => {
-    fetchCertificates();
+    checkAuth();
   }, []);
+
+  const checkAuth = async () => {
+    // 1. Check Supabase session
+    const { data: { session: supaSession } } = await supabase.auth.getSession();
+
+    if (supaSession?.user) {
+      const plan = (supaSession.user.user_metadata?.plan as string) || 'pro';
+      setSession({
+        user: { email: supaSession.user.email || '', name: supaSession.user.user_metadata?.name },
+        plan,
+        isDemo: false,
+      });
+      fetchCertificates();
+      return;
+    }
+
+    // 2. Check demo session from localStorage
+    const demoRaw = localStorage.getItem('trustchain_session');
+    if (demoRaw) {
+      try {
+        const demo = JSON.parse(demoRaw) as Session;
+        if (demo.expiresAt && demo.expiresAt > Date.now()) {
+          setSession(demo);
+          fetchCertificates();
+          return;
+        } else {
+          localStorage.removeItem('trustchain_session');
+        }
+      } catch {}
+    }
+
+    // 3. No session — redirect to login
+    router.push('/admin/login');
+  };
 
   const fetchCertificates = async () => {
     setLoading(true);
-    // Try certificates_v2 first, fallback to certificates
     let { data, error } = await supabase
       .from('certificates_v2')
       .select('*')
@@ -49,9 +93,15 @@ export default function AdminDashboard() {
       total: certs.length,
       active: certs.filter((c: any) => c.status === 'active').length,
       revoked: certs.filter((c: any) => c.status === 'revoked' || c.revoked).length,
-      verified: certs.length, // all issued are considered verified
+      verified: certs.length,
     });
     setLoading(false);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem('trustchain_session');
+    router.push('/admin/login');
   };
 
   const filtered = certificates.filter(c =>
@@ -59,6 +109,18 @@ export default function AdminDashboard() {
     c.title?.toLowerCase().includes(search.toLowerCase()) ||
     c.document_hash?.toLowerCase().includes(search.toLowerCase())
   );
+
+  const planLabel = session?.plan === 'ultra' ? 'Ultra Pro' : session?.plan === 'pro' ? 'Pro' : 'Free';
+  const PlanIcon = session?.plan === 'ultra' ? Crown : session?.plan === 'pro' ? Zap : ShieldCheck;
+  const canIssue = session?.plan === 'pro' || session?.plan === 'ultra';
+
+  if (!session) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-pulse text-muted-foreground">Verifying session encryption...</div>
+      </div>
+    );
+  }
 
   const statCards = [
     { label: 'Total Issued', value: stats.total, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
@@ -69,10 +131,55 @@ export default function AdminDashboard() {
 
   return (
     <div className="container mx-auto px-6 py-12 max-w-7xl">
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-primary mb-2">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Monitor issued credentials, blockchain anchors, and verification logs.</p>
+      
+      {/* Header with session info */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-primary mb-1">Admin Dashboard</h1>
+          <p className="text-muted-foreground text-sm">Monitor and manage issued credentials.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          {/* Plan Badge */}
+          <div className={cn(
+            'px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2',
+            session.plan === 'ultra' ? 'bg-purple-100 text-purple-700' :
+            session.plan === 'pro' ? 'bg-blue-100 text-blue-700' :
+            'bg-slate-100 text-slate-700'
+          )}>
+            <PlanIcon className="w-4 h-4" />
+            {planLabel}
+            {session.isDemo && <span className="text-amber-600 ml-1">(Demo)</span>}
+          </div>
+
+          <div className="text-sm text-muted-foreground hidden md:block">
+            {session.user.email}
+          </div>
+
+          <button onClick={handleLogout} className="p-2 rounded-lg hover:bg-secondary transition" title="Sign Out">
+            <LogOut className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
       </div>
+
+      {/* Demo Banner */}
+      {session.isDemo && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-between"
+        >
+          <div className="flex items-center gap-3">
+            <Sparkles className="w-5 h-5 text-amber-500" />
+            <div>
+              <p className="font-semibold text-amber-800 text-sm">Demo Mode Active</p>
+              <p className="text-amber-600 text-xs">You have 30 minutes of admin access. Upgrade to Pro for full access.</p>
+            </div>
+          </div>
+          <Link href="/pricing" className="px-4 py-2 btn-glass-primary text-sm rounded-lg">
+            Upgrade Now
+          </Link>
+        </motion.div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
@@ -93,6 +200,24 @@ export default function AdminDashboard() {
             <p className="text-3xl font-bold text-primary">{stat.value}</p>
           </motion.div>
         ))}
+      </div>
+
+      {/* Issue Button (Plan-gated) */}
+      <div className="mb-8 flex gap-4">
+        {canIssue ? (
+          <Link href="/issue" className="px-6 py-3 rounded-xl btn-glass-primary flex items-center gap-2">
+            <FileText className="w-4 h-4" /> Issue New Certificate
+          </Link>
+        ) : (
+          <div className="relative">
+            <button disabled className="px-6 py-3 rounded-xl bg-slate-100 text-slate-400 flex items-center gap-2 cursor-not-allowed">
+              <Lock className="w-4 h-4" /> Issue Certificate
+            </button>
+            <Link href="/pricing" className="absolute -top-2 -right-2 px-2 py-0.5 bg-blue-600 text-white text-[10px] font-bold rounded-full">
+              PRO
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Search */}
