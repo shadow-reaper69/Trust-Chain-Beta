@@ -7,6 +7,7 @@ import { ShieldCheck, Lock, Mail, Eye, EyeOff, Sparkles, Loader2 } from 'lucide-
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import MagicRings from '@/components/MagicRings';
 
 function LoginForm() {
   const router = useRouter();
@@ -209,10 +210,27 @@ function LoginForm() {
 
 export default function AdminLoginPage() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-6">
-      <Suspense fallback={<div>Loading authentication portal...</div>}>
-        <LoginForm />
-      </Suspense>
+    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-6 overflow-hidden">
+      {/* Magic Rings Background */}
+      <div className="absolute inset-0 z-0 opacity-40">
+        <MagicRings 
+          color="#3b82f6"      // Blue-500
+          colorTwo="#8b5cf6"   // Violet-500
+          speed={1.5}
+          ringCount={5}
+          baseRadius={0.4}
+          followMouse={true}
+          mouseInfluence={0.5}
+          hoverScale={1.1}
+          clickBurst={true}
+        />
+      </div>
+
+      <div className="relative z-10 w-full max-w-md">
+        <Suspense fallback={<div className="text-center">Loading authentication portal...</div>}>
+          <LoginForm />
+        </Suspense>
+      </div>
     </div>
   );
 }
