@@ -152,34 +152,7 @@ export default function IssuePage() {
       if (!res.ok) throw new Error(json.error || 'API error');
       
       setResult(json);
-
-      // Auto-download credential receipt
-      const receipt = {
-        "@context": "https://w3id.org/security/v1",
-        "type": "VerifiableCredential",
-        "issuer": formData.institution,
-        "issuanceDate": new Date().toISOString(),
-        "credentialSubject": {
-          "id": json.certId,
-          "name": formData.studentName,
-          "achievement": formData.certificateName
-        },
-        "proof": {
-          "type": "PolygonSmartContractLedger",
-          "documentHash": json.documentHash,
-          "transactionHash": json.txHash
-        }
-      };
-      
-      const blob = new Blob([JSON.stringify(receipt, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `trustchain-credential-${json.certId?.substring(0,8) || 'receipt'}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      // Removed the JSON receipt auto-download as the user already downloads the physical PDF certificate.
 
     } catch (error: any) {
       console.error(error);
