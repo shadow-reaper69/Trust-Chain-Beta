@@ -240,6 +240,7 @@ export default function AdminDashboard() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-secondary/30">
+                <th className="text-left px-6 py-4 font-semibold text-muted-foreground whitespace-nowrap">Cert ID</th>
                 <th className="text-left px-6 py-4 font-semibold text-muted-foreground">Holder</th>
                 <th className="text-left px-6 py-4 font-semibold text-muted-foreground">Certificate</th>
                 <th className="text-left px-6 py-4 font-semibold text-muted-foreground">Issuer</th>
@@ -251,13 +252,13 @@ export default function AdminDashboard() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-16 text-muted-foreground">
+                  <td colSpan={7} className="text-center py-16 text-muted-foreground">
                     <div className="animate-pulse">Loading credentials from Supabase...</div>
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-16 text-muted-foreground">
+                  <td colSpan={7} className="text-center py-16 text-muted-foreground">
                     <FileText className="w-12 h-12 mx-auto mb-4 text-slate-300" />
                     <p className="font-medium">No credentials found</p>
                     <p className="text-xs mt-1">Issue a certificate first to see it here.</p>
@@ -272,6 +273,14 @@ export default function AdminDashboard() {
                     transition={{ delay: i * 0.05 }}
                     className="border-b hover:bg-secondary/20 transition-colors"
                   >
+                    <td className="px-6 py-4 font-mono text-[10px] text-slate-500 whitespace-nowrap">
+                      {cert.id ? (
+                         <div className="flex flex-col gap-0.5" title={cert.id}>
+                           <span className="font-semibold text-slate-700">{cert.id.split('-')[0]}</span>
+                           <span className="text-[9px] opacity-60">...{cert.id.split('-').pop()?.substring(0, 4)}</span>
+                         </div>
+                      ) : '—'}
+                    </td>
                     <td className="px-6 py-4 font-medium">{cert.holder_name || '—'}</td>
                     <td className="px-6 py-4 text-muted-foreground">{cert.title || '—'}</td>
                     <td className="px-6 py-4 text-muted-foreground">{cert.issuer_name || '—'}</td>

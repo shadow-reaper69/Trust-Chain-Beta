@@ -178,6 +178,12 @@ export default function IssuePage() {
           </p>
 
           <div className="bg-secondary/50 rounded-xl p-6 text-left space-y-4 mb-8">
+            {result.certId && (
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Certificate ID</p>
+                <p className="font-mono text-xs text-foreground mt-1 break-all">{result.certId}</p>
+              </div>
+            )}
             <div>
               <p className="text-sm font-medium text-muted-foreground">Document SHA-256 Hash</p>
               <p className="font-mono text-xs text-foreground mt-1 break-all">{result.documentHash}</p>

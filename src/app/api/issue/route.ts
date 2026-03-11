@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Store Metadata in Supabase
     // If certificates_v2 table doesn't exist, we fallback to the old certificates
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('certificates_v2')
       .insert({
         holder_name: studentName,
@@ -59,11 +59,15 @@ export async function POST(request: NextRequest) {
         blockchain_hash: txHash,
         status: 'active',
         revoked: false
-      });
+      })
+      .select('id')
+      .single();
+
+    let certId = data?.id;
 
     if (error && error.code === '42P01') { 
        // relation does not exist, use legacy table
-       const { error: fallbackError } = await supabase
+       const { data: fallbackData, error: fallbackError } = await supabase
          .from('certificates')
          .insert({
            holder_name: studentName,
@@ -74,11 +78,14 @@ export async function POST(request: NextRequest) {
            blockchain_hash: txHash,
            status: 'active',
            revoked: false
-         });
+         })
+         .select('id')
+         .single();
          
          if (fallbackError) {
             throw new Error(`Fallback insert failed: ${fallbackError.message}`);
          }
+         certId = fallbackData?.id;
     } else if (error) {
        throw new Error(`Database insert failed: ${error.message}`);
     }
@@ -87,6 +94,7 @@ export async function POST(request: NextRequest) {
       success: true,
       documentHash,
       txHash,
+      certId,
       message: 'Certificate successfully anchored to Polygon and Supabase.'
     });
 
