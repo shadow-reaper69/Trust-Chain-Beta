@@ -97,12 +97,12 @@ export default function VerifyPage() {
              />
 
              <ScanLine className="w-16 h-16 text-blue-500 mx-auto mb-6 animate-pulse" />
-             <h3 className="text-2xl font-bold text-primary mb-2">Google Vision AI Analysis</h3>
-             <p className="text-muted-foreground mb-8">Uploading to Google Cloud Vision API & querying Polygon state...</p>
+             <h3 className="text-2xl font-bold text-primary mb-2">Gemini AI Forensic Analysis</h3>
+             <p className="text-muted-foreground mb-8">Uploading to Google Gemini 2.0 Flash & querying Polygon state...</p>
 
              <div className="space-y-4 max-w-sm mx-auto text-sm text-left font-mono bg-white/50 backdrop-blur-md p-6 rounded-xl border border-white/40">
                 <div className="flex justify-between"><span className="text-slate-500">File Integrity</span><span className="text-blue-600 animate-pulse">Running...</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Google Vision OCR</span><span className="text-blue-600 animate-pulse">Scanning...</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">Gemini 2.0 Flash</span><span className="text-blue-600 animate-pulse">Analyzing...</span></div>
                 <div className="flex justify-between"><span className="text-slate-500">Polygon Sync</span><span className="text-slate-400">Waiting</span></div>
                 <div className="flex justify-between"><span className="text-slate-500">VLD Overlay Build</span><span className="text-slate-400">Queued</span></div>
              </div>
@@ -199,6 +199,24 @@ export default function VerifyPage() {
                    <div className="flex justify-between pb-2"><span className="text-slate-500">Gas State</span> <span className="font-semibold">0.00 MATIC (L2 Verified)</span></div>
                  </div>
               </div>
+
+              {(result.holderName || result.institutionName || result.certificateTitle) && (
+                <div className="bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-white/40 shadow-sm">
+                  <h3 className="font-semibold text-sm mb-3 text-slate-500 uppercase tracking-widest">Gemini Extracted Metadata</h3>
+                  <div className="text-sm space-y-2">
+                    {result.holderName && <div className="flex justify-between"><span className="text-slate-500">Holder</span><span className="font-semibold">{result.holderName}</span></div>}
+                    {result.institutionName && <div className="flex justify-between"><span className="text-slate-500">Institution</span><span className="font-semibold">{result.institutionName}</span></div>}
+                    {result.certificateTitle && <div className="flex justify-between"><span className="text-slate-500">Award</span><span className="font-semibold">{result.certificateTitle}</span></div>}
+                  </div>
+                </div>
+              )}
+
+              {result.aiAssessment && (
+                <div className="bg-indigo-50/60 backdrop-blur-md p-5 rounded-3xl border border-indigo-100 shadow-sm">
+                  <h3 className="font-semibold text-sm mb-2 text-indigo-600 uppercase tracking-widest">🧠 Gemini AI Assessment</h3>
+                  <p className="text-sm text-slate-700 leading-relaxed">{result.aiAssessment}</p>
+                </div>
+              )}
 
               {result.ocrTextPreview && (
                 <div className="bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-white/40 shadow-sm">
