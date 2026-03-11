@@ -4,6 +4,7 @@ import { ShieldCheck } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import PillNav from './PillNav';
 import Link from 'next/link';
+import DecryptedText from '@/components/DecryptedText';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -16,29 +17,34 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-transparent">
-      <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+    <header className="sticky top-0 z-50 w-full bg-gradient-to-b from-[#060010] via-[#060010]/80 to-transparent pb-4">
+      <div className="container mx-auto px-6 pt-6 flex items-center justify-start gap-8">
         
-        {/* Desktop Logo (Fallback for PillNav's logo) */}
+        {/* Desktop Logo */}
         <div className="flex items-center gap-2">
-           <div className="bg-primary/10 p-1.5 rounded-lg">
-             <ShieldCheck className="w-5 h-5 text-primary" />
+           <div className="bg-sky-500/20 p-2 rounded-xl border border-sky-500/30">
+             <ShieldCheck className="w-5 h-5 text-sky-400" />
            </div>
-           <Link href="/" className="font-bold text-lg tracking-tight transition hover:opacity-80">
-             TrustChain
+           <Link href="/" className="font-bold text-xl tracking-tight transition hover:opacity-80 text-white flex items-center">
+             <DecryptedText
+               text="TrustChain"
+               speed={60}
+               maxIterations={15}
+               animateOn="hover"
+             />
            </Link>
         </div>
 
         {/* The React Bits Pill Nav */}
-        <div className="flex justify-center flex-1 ml-4 absolute left-1/2 -translate-x-1/2">
+        <div className="flex">
           <PillNav
              items={items}
              activeHref={pathname}
-             baseColor="#060010"
+             baseColor="#111111"
              pillColor="#ffffff"
              hoveredPillTextColor="#ffffff"
              pillTextColor="#111111"
-             className="shadow-xl rounded-full border border-gray-100"
+             className="shadow-xl rounded-full border border-gray-800/50 backdrop-blur-md"
           />
         </div>
 
