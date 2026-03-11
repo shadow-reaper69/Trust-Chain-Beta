@@ -1,20 +1,43 @@
+'use client';
+
 import Link from 'next/link';
 import { ShieldCheck, FileCheck2, Hexagon, ArrowRight, ScanLine } from 'lucide-react';
+import { GridScan } from '@/components/GridScan';
+import DecryptedText from '@/components/DecryptedText';
 
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-[calc(100vh-4rem)]">
       {/* Hero Section */}
-      <section className="flex-1 flex flex-col items-center justify-center bg-grid-pattern relative overflow-hidden py-24">
+      <section className="flex-1 flex flex-col items-center justify-center relative overflow-hidden py-24 bg-white">
+        {/* React Bits GridScan Background */}
+        <div className="absolute inset-0 z-0">
+           <GridScan
+             enableWebcam={false}
+             showPreview={false}
+             lineThickness={2}
+             linesColor="#e5e7eb"
+             scanColor="#111111"
+             scanOpacity={0.6}
+             gridScale={0.15}
+             lineStyle="dashed"
+           />
+        </div>
+
         {/* Background Gradients */}
-        <div className="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-        <div className="absolute -top-10 -right-20 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute top-20 -left-20 w-72 h-72 bg-teal-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none z-0" />
+        <div className="absolute -top-10 -right-20 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl z-0" />
+        <div className="absolute top-20 -left-20 w-72 h-72 bg-teal-500/10 rounded-full blur-3xl z-0" />
 
         <div className="container px-6 relative z-10 mx-auto text-center max-w-4xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 text-primary text-sm font-semibold mb-8 border border-primary/10">
             <ScanLine className="w-4 h-4" />
-            VLD Pattern Detection Engine v2.0 Live
+            <DecryptedText
+              text="VLD Pattern Detection Engine v2.0 Live"
+              speed={40}
+              maxIterations={15}
+              animateOn="hover"
+            />
           </div>
           
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-primary mb-8 leading-tight">
