@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ShieldCheck, Lock, Mail, Eye, EyeOff, Sparkles, Loader2 } from 'lucide-react';
@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
-export default function AdminLoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const plan = searchParams.get('plan') || '';
@@ -69,8 +69,7 @@ export default function AdminLoginPage() {
   const planLabel = plan === 'ultra' ? 'Ultra Pro' : plan === 'pro' ? 'Pro' : 'Free';
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-6">
-      <motion.div
+    <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
@@ -205,6 +204,15 @@ export default function AdminLoginPage() {
           </Link>
         </p>
       </motion.div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center py-12 px-6">
+      <Suspense fallback={<div>Loading authentication portal...</div>}>
+        <LoginForm />
+      </Suspense>
     </div>
   );
 }
