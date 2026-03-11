@@ -6,7 +6,8 @@ import { ShieldCheck, Upload, FileText, Loader2, CheckCircle2, Wand2 } from 'luc
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { jsPDF } from 'jspdf';
-
+import QRCode from 'qrcode';
+import { nanoid } from 'nanoid';
 export default function IssuePage() {
   const [file, setFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
@@ -39,6 +40,9 @@ export default function IssuePage() {
       // Custom design for Hindustan College
       doc.setFillColor(245, 249, 255);
       doc.rect(0, 0, 297, 210, 'F');
+      
+      // Generate a unique ID for this certificate so the hash is unique per generation
+      const uniqueId = nanoid(16);
       
       // Border
       doc.setDrawColor(3, 105, 161); // sky blue dark
@@ -89,6 +93,18 @@ export default function IssuePage() {
       doc.setFont("helvetica", "bold");
       doc.text("OFFICIAL", 240, 163, { align: "center" });
       doc.text("SEAL", 240, 168, { align: "center" });
+
+      // Embed Unique QR Code
+      const qrDataUrl = await QRCode.toDataURL(`trustchain-cert:${uniqueId}|${studName}|${formData.institution}`, {
+        margin: 1,
+        width: 150,
+        color: { dark: '#0369a1', light: '#f5f9ff' }
+      });
+      doc.addImage(qrDataUrl, 'PNG', 26, 146, 35, 35);
+      
+      doc.setTextColor(150, 150, 150);
+      doc.setFontSize(6);
+      doc.text(`ID: ${uniqueId}`, 43.5, 184, { align: "center" });
 
       const pdfBlob = doc.output('blob');
       const genFile = new File([pdfBlob], `${studName.replace(/\s+/g, '_')}_${formData.institution.replace(/\s+/g, '')}.pdf`, { type: 'application/pdf' });
