@@ -17,7 +17,7 @@ export default function HomePage() {
              showPreview={false}
              lineThickness={2}
              linesColor="#e5e7eb"
-             scanColor="#111111"
+             scanColor="#0ea5e9"
              scanOpacity={0.6}
              gridScale={0.15}
              lineStyle="dashed"
