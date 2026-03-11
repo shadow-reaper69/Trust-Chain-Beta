@@ -2,16 +2,17 @@
 
 import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { ShieldCheck, Upload, FileText, Loader2, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Upload, FileText, Loader2, CheckCircle2, Wand2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { jsPDF } from 'jspdf';
 
 export default function IssuePage() {
   const [file, setFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
-    studentName: '',
-    institution: 'Demo University',
-    certificateName: '',
+    studentName: 'Amit Sharma',
+    institution: 'Hindustan College',
+    certificateName: 'B.Tech in Computer Science',
     issueDate: new Date().toISOString().split('T')[0]
   });
 
@@ -29,6 +30,87 @@ export default function IssuePage() {
     accept: { 'application/pdf': ['.pdf'], 'image/*': ['.jpg', '.jpeg', '.png'] },
     maxFiles: 1
   });
+
+  const handleAutoGenerate = async () => {
+    setIsIssuing(true);
+    try {
+      const doc = new jsPDF('landscape');
+      
+      // Custom design for Hindustan College
+      doc.setFillColor(245, 249, 255);
+      doc.rect(0, 0, 297, 210, 'F');
+      
+      // Border
+      doc.setDrawColor(3, 105, 161); // sky blue dark
+      doc.setLineWidth(3);
+      doc.rect(10, 10, 277, 190);
+      doc.setLineWidth(1);
+      doc.rect(12, 12, 273, 186);
+
+      // Text
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(40);
+      doc.setTextColor(3, 105, 161);
+      doc.text(formData.institution, 148.5, 50, { align: "center" });
+
+      doc.setFontSize(24);
+      doc.setTextColor(50, 50, 50);
+      doc.text("Certificate of Degree", 148.5, 75, { align: "center" });
+
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "normal");
+      doc.text("This is to certify that", 148.5, 100, { align: "center" });
+
+      doc.setFontSize(30);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(10, 10, 10);
+      const studName = formData.studentName || "Student Name";
+      doc.text(studName, 148.5, 120, { align: "center" });
+
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(50, 50, 50);
+      doc.text("has successfully completed the degree program in", 148.5, 140, { align: "center" });
+
+      doc.setFontSize(22);
+      doc.setFont("helvetica", "italic");
+      const certName = formData.certificateName || "Degree";
+      doc.text(certName, 148.5, 160, { align: "center" });
+
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Issued on: ${formData.issueDate}`, 148.5, 180, { align: "center" });
+
+      // Seal
+      doc.setFillColor(3, 105, 161);
+      doc.circle(240, 165, 20, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("OFFICIAL", 240, 163, { align: "center" });
+      doc.text("SEAL", 240, 168, { align: "center" });
+
+      const pdfBlob = doc.output('blob');
+      const genFile = new File([pdfBlob], `${studName.replace(/\s+/g, '_')}_${formData.institution.replace(/\s+/g, '')}.pdf`, { type: 'application/pdf' });
+      setFile(genFile);
+      
+      // Auto-download the simulated PDF to the user's computer
+      const url = URL.createObjectURL(pdfBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = genFile.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+    } catch(e) {
+      console.error(e);
+      alert("Error generating PDF");
+    } finally {
+      setIsIssuing(false);
+    }
+  };
 
   const handleIssue = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,9 +185,18 @@ export default function IssuePage() {
           
           <div className="space-y-6">
             <div className="bg-white p-8 rounded-2xl border shadow-sm">
-              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" /> Document Upload
-              </h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" /> Document Upload
+                </h2>
+                <button 
+                  type="button" 
+                  onClick={handleAutoGenerate}
+                  className="text-xs bg-sky-500 hover:bg-sky-600 text-white px-3 py-1.5 rounded-md flex items-center gap-1 transition-colors"
+                >
+                  <Wand2 className="w-3 h-3" /> Auto-Generate Fake PDF
+                </button>
+              </div>
               
               <div 
                 {...getRootProps()} 
@@ -164,10 +255,10 @@ export default function IssuePage() {
                   <div>
                     <label className="block text-sm font-medium mb-1">Institution</label>
                     <input 
-                      disabled
                       type="text" 
                       value={formData.institution}
-                      className="w-full px-4 py-2 rounded-lg border bg-secondary/50 text-muted-foreground" 
+                      onChange={e => setFormData({ ...formData, institution: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-primary focus:outline-none transition" 
                     />
                   </div>
                   <div>
