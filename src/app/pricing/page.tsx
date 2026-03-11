@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Check, Zap, Crown, Shield, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import LiquidEther from '@/components/LiquidEther';
 
 const plans = [
   {
@@ -95,26 +96,40 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="container mx-auto px-6 py-16 max-w-6xl">
-      <div className="text-center mb-16">
+    <div className="relative min-h-[calc(100vh-4rem)] bg-[#060611] text-white flex flex-col items-center py-16 overflow-hidden">
+      {/* Liquid Ether Background */}
+      <div className="absolute inset-0 z-0 opacity-40 mix-blend-screen">
+         <LiquidEther
+           mouseForce={0.5}
+           cursorSize={40}
+           isViscous={true}
+           viscous={35}
+           // Use sky blue/cyan dark theme colors
+           colors={['#0e172a', '#0284c7', '#0369a1']}
+           autoDemo={true}
+         />
+      </div>
+
+      <div className="container px-6 max-w-6xl relative z-10">
+        <div className="text-center mb-16">
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-4xl md:text-5xl font-extrabold text-primary mb-4"
+          className="text-4xl md:text-5xl font-extrabold text-white mb-4"
         >
           Choose Your Plan
         </motion.h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+        <p className="text-lg text-sky-100/70 max-w-2xl mx-auto mb-8">
           Verify certificates for free. Upgrade to Pro or Ultra Pro for admin access, AI-powered issuance, and enterprise features.
         </p>
 
         {/* Billing Toggle */}
-        <div className="inline-flex items-center gap-1 p-1 bg-secondary/80 backdrop-blur-md rounded-full border border-white/40">
+        <div className="inline-flex items-center gap-1 p-1 bg-white/5 backdrop-blur-md rounded-full border border-white/10">
           <button
             onClick={() => setBilling('weekly')}
             className={cn(
               'px-5 py-2 rounded-full text-sm font-medium transition-all',
-              billing === 'weekly' ? 'bg-primary text-white shadow-md' : 'text-muted-foreground hover:text-primary'
+              billing === 'weekly' ? 'bg-sky-500 text-white shadow-md' : 'text-slate-300 hover:text-white'
             )}
           >
             Weekly
@@ -123,7 +138,7 @@ export default function PricingPage() {
             onClick={() => setBilling('monthly')}
             className={cn(
               'px-5 py-2 rounded-full text-sm font-medium transition-all',
-              billing === 'monthly' ? 'bg-primary text-white shadow-md' : 'text-muted-foreground hover:text-primary'
+              billing === 'monthly' ? 'bg-sky-500 text-white shadow-md' : 'text-slate-300 hover:text-white'
             )}
           >
             Monthly
@@ -140,12 +155,12 @@ export default function PricingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.15 }}
             className={cn(
-              'relative rounded-3xl p-8 flex flex-col bg-white/80 backdrop-blur-xl border shadow-[0_8px_40px_rgba(0,0,0,0.06)]',
-              plan.popular && 'border-blue-300 ring-2 ring-blue-200 scale-[1.02]'
+              'relative rounded-3xl p-8 flex flex-col bg-white/5 backdrop-blur-xl border border-white/10 shadow-xl',
+              plan.popular && 'border-sky-500/50 ring-2 ring-sky-500/20 scale-[1.02] bg-white/10'
             )}
           >
             {plan.popular && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold rounded-full shadow-lg">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-sky-500 text-white text-xs font-bold rounded-full shadow-[0_0_15px_rgba(14,165,233,0.5)]">
                 MOST POPULAR
               </div>
             )}
@@ -160,13 +175,13 @@ export default function PricingPage() {
             <div className="mb-4">
               <span className="text-4xl font-extrabold">{getPrice(plan)}</span>
               {plan.period && (
-                <span className="text-muted-foreground text-sm">
+                <span className="text-sky-100/50 text-sm">
                   {billing === 'weekly' ? '/week' : plan.period}
                 </span>
               )}
             </div>
 
-            <p className="text-sm text-muted-foreground mb-6">{plan.description}</p>
+            <p className="text-sm text-sky-100/70 mb-6">{plan.description}</p>
 
             <ul className="space-y-3 mb-8 flex-1">
               {plan.features.map((f) => (
@@ -186,10 +201,10 @@ export default function PricingPage() {
             <Link
               href={plan.href}
               className={cn(
-                'w-full py-3 rounded-xl text-center font-semibold flex items-center justify-center gap-2 transition-all',
+                'w-full py-3 rounded-xl text-center font-semibold flex items-center justify-center gap-2 transition-all border',
                 plan.popular
-                  ? 'btn-glass-primary text-base'
-                  : 'btn-glass text-base'
+                  ? 'bg-sky-500 hover:bg-sky-400 border-sky-400 text-white shadow-[0_0_20px_rgba(14,165,233,0.3)]'
+                  : 'bg-white/5 border-white/10 hover:bg-white/10 text-white'
               )}
             >
               {plan.cta} <ArrowRight className="w-4 h-4" />
@@ -198,14 +213,15 @@ export default function PricingPage() {
         ))}
       </div>
 
-      <div className="text-center mt-12">
-        <p className="text-muted-foreground text-sm">
+      <div className="text-center mt-12 relative z-10">
+        <p className="text-sky-100/70 text-sm">
           Want to try admin features first?{' '}
-          <Link href="/admin/login?demo=true" className="text-blue-600 font-semibold hover:underline">
+          <Link href="/admin/login?demo=true" className="text-sky-400 font-semibold hover:text-sky-300 transition-colors">
             Try the free demo →
           </Link>
         </p>
       </div>
     </div>
+  </div>
   );
 }
