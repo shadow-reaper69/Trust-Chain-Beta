@@ -133,10 +133,83 @@ export default function IssuePage() {
     if (!file) return alert('Please upload a certificate document');
 
     setIsIssuing(true);
+    let finalFile = file;
     
+    // Automatically Stamp Uploaded Document with a Secure QR Code
+    try {
+      const { PDFDocument } = await import('pdf-lib');
+      const uniqueId = nanoid(16);
+      const studentNameSafe = formData.studentName || "Upload";
+      const qrDataUrl = await QRCode.toDataURL(`trustchain-cert:${uniqueId}|${studentNameSafe}|${formData.institution}`, {
+        margin: 1,
+        width: 250,
+        color: { dark: '#0369a1', light: '#f5f9ff' }
+      });
+      // Convert QR to buffer
+      const qrRes = await fetch(qrDataUrl);
+      const qrBuffer = await qrRes.arrayBuffer();
+
+      if (file.type === 'application/pdf') {
+        const fileBuffer = await file.arrayBuffer();
+        const pdfDoc = await PDFDocument.load(fileBuffer);
+        const pages = pdfDoc.getPages();
+        const firstPage = pages[0];
+        const qrImage = await pdfDoc.embedPng(qrBuffer);
+        
+        // Draw near bottom right
+        const { width, height } = firstPage.getSize();
+        firstPage.drawImage(qrImage, {
+          x: width - 70,
+          y: 30,
+          width: 50,
+          height: 50,
+        });
+
+        const modifiedPdfBytes = await pdfDoc.save();
+        const blob = new Blob([new Uint8Array(modifiedPdfBytes)], { type: 'application/pdf' });
+        finalFile = new File([blob], file.name, { type: 'application/pdf' });
+      } else if (file.type.startsWith('image/')) {
+        // Modify Image via HTML Canvas
+        const bitmap = await createImageBitmap(file);
+        const canvas = document.createElement('canvas');
+        canvas.width = bitmap.width;
+        canvas.height = bitmap.height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(bitmap, 0, 0);
+          const qrImg = new window.Image();
+          qrImg.src = qrDataUrl;
+          await new Promise((resolve) => { qrImg.onload = resolve; });
+          
+          // Draw QR scaled into the bottom right corner
+          const qrSize = Math.max(80, Math.min(bitmap.width, bitmap.height) * 0.15);
+          ctx.drawImage(qrImg, bitmap.width - qrSize - 20, bitmap.height - qrSize - 20, qrSize, qrSize);
+          
+          const blob = await new Promise<Blob | null>(res => canvas.toBlob(res, file.type));
+          if (blob) {
+            finalFile = new File([blob], file.name, { type: file.type });
+          }
+        }
+      }
+      
+      // Since it's a completely new hashed file, automatically download the stamped copy for the user
+      const downloadUrl = URL.createObjectURL(finalFile);
+      const tempLink = document.createElement('a');
+      tempLink.href = downloadUrl;
+      tempLink.download = `trustchain_stamped_${file.name}`;
+      document.body.appendChild(tempLink);
+      tempLink.click();
+      document.body.removeChild(tempLink);
+      URL.revokeObjectURL(downloadUrl);
+
+    } catch (err) {
+      console.error("Error trying to stamp QR code onto file:", err);
+      // Failsafe: Continue with original file if parsing fails
+    }
+
     // Simulate File -> Hash -> API -> Smart Contract
     const data = new FormData();
-    data.append('file', file);
+    data.append('file', finalFile);
     data.append('studentName', formData.studentName);
     data.append('institution', formData.institution);
     data.append('certificateName', formData.certificateName);
