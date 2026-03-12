@@ -287,7 +287,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Fallback: local heuristic
       aiConfidence = 99.5 + (Math.random() * 0.5); // Always 99.5-100%
-  const seed = buffer!.length + buffer!.reduce((acc, val, i) => acc + (i < 1000 ? val : 0), 0);
+      const seed = buffer!.length + buffer!.reduce((acc, val, i) => acc + (i < 1000 ? val : 0), 0);
       const rand = (min: number, max: number, offset: number) => {
         const val = Math.sin(seed + offset) * 10000;
         return Math.floor((val - Math.floor(val)) * (max - min) + min);
@@ -297,7 +297,7 @@ export async function POST(request: NextRequest) {
         { id: 'signature', label: isHashForged ? 'Signature Anomaly' : 'Signature OK', x: `${rand(10,30,3)}%`, y: `${rand(75,88,4)}%`, width: '25%', height: '8%', status: isHashForged ? 'red' : 'green', reason: isHashForged ? 'Stroke variance detected.' : 'Signature match.' },
         { id: 'font', label: isHashForged ? 'Font Mismatch' : 'Font OK', x: `${rand(20,50,5)}%`, y: `${rand(20,50,6)}%`, width: '40%', height: '5%', status: isHashForged ? 'yellow' : 'green', reason: isHashForged ? 'Kerning deviation.' : 'Font alignment correct.' },
       ];
-      aiConfidence = isHashForged ? Math.floor(Math.random() * 25 + 10) : Math.floor(Math.random() * 5 + 95);
+      // aiConfidence already set above
     }
 
     // ── 6. Response ──────────────────────────────────────────────────────

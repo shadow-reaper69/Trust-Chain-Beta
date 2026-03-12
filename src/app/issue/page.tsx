@@ -115,7 +115,8 @@ export default function IssuePage() {
       doc.text("VERIFIED", 250, 165, { align: "center" });
       doc.text("BY VLD", 250, 175, { align: "center" });
 
-      const qrDataUrl = await QRCode.toDataURL(`https://trustchain.io/verify?cid=pending`, {
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://trustchain-v2.vercel.app';
+      const qrDataUrl = await QRCode.toDataURL(`${origin}/verify?documentHash=${uniqueId}`, {
         margin: 1,
         width: 150,
         color: { dark: '#000000', light: '#ffffff' }
