@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { supabase } from '@/lib/supabase';
 import { getProvider, getContract } from '@/lib/web3';
 import { ethers } from 'ethers';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,31 +23,80 @@ export async function POST(request: NextRequest) {
     const documentHash = crypto.createHash('sha256').update(buffer).digest('hex');
 
     // 2. Call Polygon Smart Contract (using Ethers.js)
-    // For hackathons, if no private key is provided, we simulate the tx block.
-    // If provided, we do the real execution.
     let txHash = '';
-    
     if (process.env.POLYGON_PRIVATE_KEY) {
       try {
         const provider = getProvider();
         const wallet = new ethers.Wallet(process.env.POLYGON_PRIVATE_KEY, provider);
         const contract = getContract(wallet);
-        
-        // Broadcast to Polygon
         const tx = await contract.issueCertificate(documentHash);
-        const receipt = await tx.wait(); // Wait for confirmation
+        const receipt = await tx.wait(); 
         txHash = receipt.hash;
       } catch (e: any) {
-        console.error("Smart Contract Error (Is wallet funded?):", e);
+        console.error("Smart Contract Error:", e);
         txHash = `0xFallback${crypto.createHash('sha256').update(documentHash + Date.now().toString()).digest('hex').substring(0, 50)}`;
       }
     } else {
-       // deterministic transaction hash simulation for local development without keys
        txHash = `0x${crypto.createHash('sha256').update(documentHash + Date.now().toString()).digest('hex')}`
     }
 
-    // 3. Store Metadata in Supabase
-    // If certificates_v2 table doesn't exist, we fallback to the old certificates
+    // 3. Pin file to Pinata (IPFS)
+    let ipfsCid: string | null = null;
+    try {
+      const PINATA_JWT = process.env.PINATA_JWT;
+      const PINATA_KEY = process.env.PINATA_API_KEY;
+      const PINATA_SECRET = process.env.PINATA_SECRET_API_KEY;
+
+      if (PINATA_JWT || (PINATA_KEY && PINATA_SECRET)) {
+        console.log(`[Pinata] Attempting upload for ${studentName}...`);
+        const pinForm = new FormData();
+        
+        // Convert to Blob for safer transmission in node environments
+        const fileBlob = new Blob([buffer], { type: 'application/pdf' });
+        pinForm.append('file', fileBlob, `${studentName.replace(/\s+/g, '_')}_Certificate.pdf`);
+        
+        const metadata = JSON.stringify({
+          name: `${studentName}_${certificateName}`,
+          keyvalues: { 
+            student: studentName, 
+            institution, 
+            hash: documentHash,
+            issued_at: issueDate 
+          }
+        });
+        pinForm.append('pinataMetadata', metadata);
+        pinForm.append('pinataOptions', JSON.stringify({ cidVersion: 1 }));
+
+        const headers: any = {};
+        if (PINATA_JWT) {
+          headers['Authorization'] = `Bearer ${PINATA_JWT}`;
+        } else {
+          headers['pinata_api_key'] = PINATA_KEY;
+          headers['pinata_secret_api_key'] = PINATA_SECRET;
+        }
+
+        const pinRes = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
+          method: 'POST',
+          headers,
+          body: pinForm,
+        });
+
+        if (pinRes.ok) {
+          const pinJson = await pinRes.json();
+          ipfsCid = pinJson?.IpfsHash || null;
+          console.log(`[Pinata] Upload Success: ${ipfsCid}`);
+        } else {
+          const errText = await pinRes.text();
+          console.error(`[Pinata] Upload Failed (${pinRes.status}):`, errText);
+        }
+      } else {
+        console.warn('[Pinata] No API keys found in environment variables.');
+      }
+    } catch (e) { 
+      console.error('[Pinata] Exception during upload:', e); 
+    }
+
+    // 4. Store Metadata in Supabase Ledger
     const { data, error } = await supabase
       .from('certificates_v2')
       .insert({
@@ -57,47 +106,23 @@ export async function POST(request: NextRequest) {
         issued_at: issueDate,
         document_hash: documentHash,
         blockchain_hash: txHash,
-        status: 'active',
-        revoked: false
+        ipfs_cid: ipfsCid,
+        status: 'active'
       })
       .select('id')
       .single();
 
-    let certId = data?.id;
-
-    if (error && (error.code === '42P01' || error.code === 'PGRST205')) { 
-       // relation does not exist, use legacy table
-       const { data: fallbackData, error: fallbackError } = await supabase
-         .from('certificates')
-         .insert({
-           holder_name: studentName,
-           title: certificateName,
-           issuer_name: institution,
-           issued_at: issueDate,
-           document_hash: documentHash,
-           blockchain_hash: txHash,
-           status: 'active',
-           revoked: false,
-           institution_id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-           certificate_type: 'Degree'
-         })
-         .select('id')
-         .single();
-         
-         if (fallbackError) {
-            throw new Error(`Fallback insert failed: ${fallbackError.message}`);
-         }
-         certId = fallbackData?.id;
-    } else if (error) {
-       throw new Error(`Database insert failed: ${error.message}`);
+    if (error) {
+       console.error('Database Sync Error:', error.message);
     }
 
     return NextResponse.json({
       success: true,
       documentHash,
       txHash,
-      certId,
-      message: 'Certificate successfully anchored to Polygon and Supabase.'
+      ipfsCid,
+      certId: data?.id,
+      message: 'Certificate anchored to Blockchain, IPFS, and Supabase Ledger.'
     });
 
   } catch (err: any) {

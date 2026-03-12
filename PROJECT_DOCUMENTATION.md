@@ -37,21 +37,36 @@ CREATE TABLE IF NOT EXISTS certificates_v2 (
 );
 ```
 
+## Fix 3: Pinata (IPFS) Integration
+TrustChain now supports decentralized storage via Pinata IPFS. When a certificate is issued, it is automatically pinned to the IPFS network.
+
+1. Create a [Pinata account](https://pinata.cloud/).
+2. Generate an API Key (with Admin permissions) and copy the **JWT Token**.
+3. In your `.env.local`, add:
+   ```env
+   PINATA_JWT=your_jwt_here
+   PINATA_API_KEY=your_key
+   PINATA_SECRET_API_KEY=your_secret
+   NEXT_PUBLIC_PINATA_GATEWAY=https://gateway.pinata.cloud
+   ```
+
 ## How the Hashing & Verification Pipeline Works
 
 1. **Auto-Generation & QR Embedding**
-   When an admin goes to `/issue` and clicks **Auto-Generate Fake PDF**, the system compiles a beautiful graphical PDF locally via `jsPDF`. We utilize the exact Student Name and Institution entered into the admin panel, and use `nanoid` to generate a secure cryptographic string identifier for the QR Code dynamically embedded in the lower-left corner of the certificate. Since the exact byte-code of the file is intrinsically tied to that QR Code and specific Name, it becomes perfectly unique. 
+   When an admin goes to `/issue` and clicks **Issue Credential**, the system compiles a beautiful graphical PDF locally via `jsPDF`. We embed a secure cryptographic Hash QR Code dynamically in the lower-left corner. 
    
-2. **Ledger Storage (Issuing)**
-   When the Admin uploads that certificate to the "Issue Credential" box, the system extracts the exact `SHA-256 Document Hash` bytes. It inserts the Student Name, Certificate Name, QR Code Hash, and Document Hash permanently into the `certificates_v2` database table, simulating writing blocks to a smart contract. You now have a complete, mathematically perfect, digital twin in your immutable database.
+2. **Ledger & IPFS Storage**
+   The system extracts the `SHA-256 Document Hash`. 
+   - **Blockchain:** It anchors the hash to the Polygon network (simulated or real).
+   - **IPFS:** It pins the actual document bytes to Pinata IPFS, returning a CID (Content Identifier).
+   - **Registry:** (Optional) Stores metadata in Supabase.
 
-3. **Dual AI & Cryptographic Verification**
-   When a user clicks "Verify Credentials" and uploads the PDF:
-    - **Step A:** We generate the exact SHA-256 byte-hash from the uploaded file instantly in memory.
-    - **Step B:** We query your Supabase `certificates_v2` table. Does this hash exist? If yes, the database is intact, and it flags as `Verified: True`. If it has been tampered with, the hash radically changes, and it flags as forged!
-    - **Step C:** If the database registry fails, it runs the image file through the Google Gemini 2.0 AI context engine (assuming your API Key is set). Gemini scans for fake signatures, bad font kerning, misaligned seals, and performs OCR text cross-referencing against the Student Name registered in the database!
+3. **Multi-Mode Verification**
+   Users can verify credentials in two ways:
+    - **Document Upload:** Drop the PDF/Image to compare its local hash against the ledger.
+    - **CID Verification:** Paste an IPFS CID. The system fetches the file from the gateway, hashes it, and verifies it against the blockchain state!
 
 ### System Roles
-* **Admin Panel (`/admin`):** Secure panel restricted by session tokens to monitor live registered certificates, trace Polygon simulated TxHashes, and manage revocation statuses.
-* **Common Issue Panel (`/issue`):** Internal interface allowing the admin to dynamically mock, build, and issue certificates to the blockchain simulated database.
-* **Public Verify Panel (`/verify`):** A frontend open panel where absolutely anyone can drop the PDF to mathematically guarantee its byte-integrity against the Supabase ledger, bypassing fraud.
+* **Admin Panel (`/admin`):** Monitor registered certificates and IPFS CIDs.
+* **Issue Panel (`/issue`):** Generate and issue certificates to Polygon and IPFS.
+* **Verify Panel (`/verify`):** Public verify panel supports both file upload and IPFS CID verification.

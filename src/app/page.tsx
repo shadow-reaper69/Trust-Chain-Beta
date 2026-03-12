@@ -9,92 +9,88 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-[calc(100vh-4rem)]">
       {/* Hero Section */}
-      <section className="flex-1 flex flex-col items-center justify-center relative overflow-hidden py-24 bg-[#060611] text-white">
-        {/* React Bits GridScan Background — Inverted (dark bg, light lines) */}
-        <div className="absolute inset-0 z-0">
-           <GridScan
-             enableWebcam={false}
-             showPreview={false}
-             lineThickness={2}
-             linesColor="#1e293b"
-             scanColor="#38bdf8"
-             scanOpacity={0.8}
-             gridScale={0.15}
-             lineStyle="dashed"
-           />
+      <section className="flex-1 flex flex-col items-center justify-center relative overflow-hidden py-32 bg-white text-black">
+        <div className="absolute inset-0 z-0 opacity-20">
+          <GridScan 
+            linesColor="#000000" 
+            scanColor="#000000" 
+            gridScale={0.1} 
+            lineThickness={1} 
+            bloomIntensity={0}
+            enablePost={false}
+            scanOpacity={0.05}
+          />
         </div>
 
-        {/* Background Gradients */}
-        <div className="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-sky-500/5 to-transparent pointer-events-none z-0" />
-        <div className="absolute -top-10 -right-20 w-72 h-72 bg-blue-600/15 rounded-full blur-3xl z-0" />
-        <div className="absolute top-20 -left-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl z-0" />
-
-        <div className="container px-6 relative z-10 mx-auto text-center max-w-4xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 text-sky-400 text-sm font-semibold mb-8 border border-sky-500/20">
+        <div className="container px-6 relative z-10 mx-auto text-center max-w-5xl">
+          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] mb-12 shadow-2xl transform -skew-x-12">
             <ScanLine className="w-4 h-4" />
             <DecryptedText
-              text="VLD Pattern Detection Engine v2.0 Live"
-              speed={40}
-              maxIterations={15}
+              text="FORGERY DETECTION ENGINE V2.0 ACTIVE"
+              speed={50}
+              maxIterations={20}
               animateOn="hover"
             />
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-8 leading-tight">
-            Universal Credential <br /> Verification Platform
+          <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-black mb-10 leading-[0.85] uppercase">
+            TRUST <br /> WITHOUT <br /> LIMITS.
           </h1>
           
-          <p className="text-xl text-sky-100/70 mb-12 max-w-2xl mx-auto leading-relaxed">
-            Instantly issue and verify credentials using Polygon blockchain immutability and our Explainable AI <span className="font-semibold text-sky-400">Visual Logical Detection (VLD)</span> engine.
+          <p className="text-xl text-slate-500 mb-16 max-w-2xl mx-auto leading-relaxed font-medium">
+            The world's first triple-layer credential ledger. We sync <span className="text-black font-bold">Polygon Blockchain</span>, <span className="text-black font-bold">IPFS Pinata</span>, and <span className="text-black font-bold">Supabase Registry</span> with Visual AI forensics (VLD).
           </p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/verify" className="w-full sm:w-auto px-8 py-4 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-lg flex items-center justify-center gap-2 transition-colors shadow-lg shadow-sky-500/20">
-              Verify Document <FileCheck2 className="w-5 h-5" />
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <Link href="/verify" className="w-full sm:w-auto px-12 py-5 rounded-2xl bg-black text-white text-lg font-black flex items-center justify-center gap-3 transition-all hover:scale-105 hover:bg-slate-900 shadow-[20px_20px_0px_0px_rgba(0,0,0,0.1)]">
+              VERIFY NOW <FileCheck2 className="w-6 h-6" />
             </Link>
-            <Link href="/issue" className="w-full sm:w-auto px-8 py-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-white text-lg flex items-center justify-center gap-2 transition-colors">
-              Issue Credentials <ArrowRight className="w-5 h-5" />
+            <Link href="/issue" className="w-full sm:w-auto px-12 py-5 rounded-2xl bg-white border-4 border-black text-black text-lg font-black flex items-center justify-center gap-3 transition-all hover:bg-slate-50 shadow-[10px_10px_0px_0px_rgba(0,0,0,0.05)]">
+              ISSUE CREDENTIAL <ArrowRight className="w-6 h-6" />
             </Link>
           </div>
         </div>
       </section>
 
       {/* Feature Section */}
-      <section className="py-24 bg-white border-t">
-        <div className="container mx-auto px-6 max-w-6xl">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold tracking-tight text-primary mb-4">Enterprise-grade Security Architecture</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">TrustChain operates on a zero-trust architecture powered by Layer-2 blockchain cryptography and heuristic AI validation.</p>
+      <section className="py-32 bg-slate-50 border-y-4 border-black relative overflow-hidden">
+        {/* Decorative Grid */}
+        <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:20px_20px]" />
+
+        <div className="container mx-auto px-6 max-w-6xl relative z-10">
+          <div className="text-center mb-24">
+            <h2 className="text-5xl font-black tracking-tighter text-black mb-6 uppercase">Military-Grade Protocol</h2>
+            <p className="text-slate-500 max-w-2xl mx-auto text-lg font-medium leading-relaxed">The TrustChain ecosystem operates on a zero-vulnerability perimeter using decentralized storage and visual heuristics.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="p-8 rounded-2xl bg-secondary/50 border hover:shadow-lg transition">
-              <div className="bg-primary/5 w-14 h-14 flex items-center justify-center rounded-xl mb-6 border border-primary/10">
-                <Hexagon className="w-7 h-7 text-primary" />
+          <div className="grid md:grid-cols-3 gap-12">
+            <div className="p-10 rounded-[2rem] bg-white border-4 border-black shadow-[15px_15px_0px_0px_rgba(0,0,0,1)] group hover:-translate-y-2 transition-transform">
+              <div className="bg-black w-16 h-16 flex items-center justify-center rounded-2xl mb-8 transform -rotate-12 group-hover:rotate-0 transition-transform">
+                <Hexagon className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Polygon Blockchain</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Immutable, timestamped hashes written directly to the Polygon Amoy network guaranteeing zero tampering.
+              <h3 className="text-2xl font-black mb-4 uppercase tracking-tight">On-Chain Ledger</h3>
+              <p className="text-slate-500 font-medium leading-relaxed">
+                Every document hash is immutable and anchored to the Polygon Proof-of-Stake network, creating a permanent verification proof.
               </p>
             </div>
 
-            <div className="p-8 rounded-2xl bg-secondary/50 border hover:shadow-lg transition">
-              <div className="bg-blue-500/5 w-14 h-14 flex items-center justify-center rounded-xl mb-6 border border-blue-500/10">
-                <ScanLine className="w-7 h-7 text-blue-600" />
+            <div className="p-10 rounded-[2rem] bg-white border-4 border-black shadow-[15px_15px_0px_0px_rgba(0,0,0,1)] group hover:-translate-y-2 transition-transform">
+              <div className="bg-black w-16 h-16 flex items-center justify-center rounded-2xl mb-8 transform rotate-6 group-hover:rotate-0 transition-transform">
+                <ScanLine className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Visual Logical Detection</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Our Explainable AI doesn't just pass or fail. It draws exact bounding boxes over suspicious signatures, fonts, and seals.
+              <h3 className="text-2xl font-black mb-4 uppercase tracking-tight">Visual Forensics</h3>
+              <p className="text-slate-500 font-medium leading-relaxed">
+                Gemini 2.0 Flash AI analyzes logo integrity, signature logical flow, and stamp authenticity in real-time.
               </p>
             </div>
 
-            <div className="p-8 rounded-2xl bg-secondary/50 border hover:shadow-lg transition">
-              <div className="bg-teal-500/5 w-14 h-14 flex items-center justify-center rounded-xl mb-6 border border-teal-500/10">
-                <ShieldCheck className="w-7 h-7 text-teal-600" />
+            <div className="p-10 rounded-[2rem] bg-white border-4 border-black shadow-[15px_15px_0px_0px_rgba(0,0,0,1)] group hover:-translate-y-2 transition-transform">
+              <div className="bg-black w-16 h-16 flex items-center justify-center rounded-2xl mb-8 transform -rotate-3 group-hover:rotate-0 transition-transform">
+                <ShieldCheck className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Instant Cryptography</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Local SHA-256 generation ensures raw files never leave the browser, keeping sensitive student data 100% private.
+              <h3 className="text-2xl font-black mb-4 uppercase tracking-tight">IPFS Persistence</h3>
+              <p className="text-slate-500 font-medium leading-relaxed">
+                Credentials are stored in a distributed peer-to-peer network via Pinata, ensuring your certificates never go offline.
               </p>
             </div>
           </div>

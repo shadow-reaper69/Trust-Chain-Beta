@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import CursorParticles from "@/components/CursorParticles";
+import { SnowPixels } from "@/components/SnowPixels";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,6 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} min-h-screen bg-background font-sans antialiased flex flex-col`}>
+        <SnowPixels />
         <CursorParticles />
         <Navbar />
         <main className="flex-1">

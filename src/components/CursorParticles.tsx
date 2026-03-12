@@ -34,19 +34,19 @@ export default function CursorParticles() {
     resize();
     window.addEventListener('resize', resize);
 
+    // B&W Suited Colors
     const colors = [
-      'rgba(99, 102, 241, ALPHA)',   // indigo
-      'rgba(139, 92, 246, ALPHA)',    // violet
-      'rgba(59, 130, 246, ALPHA)',    // blue
-      'rgba(14, 165, 233, ALPHA)',    // sky
-      'rgba(20, 184, 166, ALPHA)',    // teal
+      'rgba(0, 0, 0, ALPHA)',      // Black
+      'rgba(50, 50, 50, ALPHA)',   // Dark Gray
+      'rgba(100, 100, 100, ALPHA)', // Medium Gray
+      'rgba(150, 150, 150, ALPHA)', // Light Gray
+      'rgba(200, 200, 200, ALPHA)', // Ultra Light Gray
     ];
 
     const handleMouseMove = (e: MouseEvent) => {
       mouse.current.x = e.clientX;
       mouse.current.y = e.clientY;
 
-      // Spawn 2-3 particles per frame
       for (let i = 0; i < 2; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = Math.random() * 1.5 + 0.5;
@@ -64,50 +64,59 @@ export default function CursorParticles() {
         });
       }
 
-      // Cap particles
-      if (particles.current.length > 150) {
-        particles.current = particles.current.slice(-150);
+      if (particles.current.length > 100) {
+        particles.current = particles.current.slice(-100);
       }
     };
 
     window.addEventListener('mousemove', handleMouseMove);
 
     const animate = () => {
+      if (!ctx || !canvas) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      particles.current = particles.current.filter(p => p.life < p.maxLife);
+      // Create a copy to avoid mutation issues during iteration
+      const currentParticles = [...particles.current];
+      particles.current = currentParticles.filter(p => p.life < p.maxLife);
 
       for (const p of particles.current) {
+        if (!p) continue;
+
         p.x += p.vx;
         p.y += p.vy;
-        p.vy += 0.02; // slight gravity
+        p.vy += 0.02; 
         p.life++;
-        p.alpha = 1 - p.life / p.maxLife;
+        p.alpha = Math.max(0, 1 - p.life / p.maxLife);
 
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * p.alpha, 0, Math.PI * 2);
-        ctx.fillStyle = p.color.replace('ALPHA', String(p.alpha * 0.6));
-        ctx.fill();
+        const radius = Math.max(0, p.size * p.alpha);
+        if (radius > 0) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = p.color.replace('ALPHA', String(p.alpha * 0.4));
+          ctx.fill();
 
-        // Glow
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * p.alpha * 2.5, 0, Math.PI * 2);
-        ctx.fillStyle = p.color.replace('ALPHA', String(p.alpha * 0.15));
-        ctx.fill();
+          // Subtle Dark Glow
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, radius * 2, 0, Math.PI * 2);
+          ctx.fillStyle = p.color.replace('ALPHA', String(p.alpha * 0.1));
+          ctx.fill();
+        }
       }
 
-      // Draw connecting lines between close particles
+      // Connecting lines (Grayscale)
       for (let i = 0; i < particles.current.length; i++) {
         for (let j = i + 1; j < particles.current.length; j++) {
           const a = particles.current[i];
           const b = particles.current[j];
+          if (!a || !b) continue;
+          
           const dist = Math.hypot(a.x - b.x, a.y - b.y);
           if (dist < 60) {
-            const lineAlpha = (1 - dist / 60) * Math.min(a.alpha, b.alpha) * 0.3;
+            const lineAlpha = (1 - dist / 60) * Math.min(a.alpha, b.alpha) * 0.2;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
             ctx.lineTo(b.x, b.y);
-            ctx.strokeStyle = `rgba(99, 102, 241, ${lineAlpha})`;
+            ctx.strokeStyle = `rgba(0, 0, 0, ${lineAlpha})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -129,8 +138,8 @@ export default function CursorParticles() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 z-50 pointer-events-none"
-      style={{ mixBlendMode: 'screen' }}
+      className="fixed inset-0 z-50 pointer-events-none opacity-50"
+      style={{ mixBlendMode: 'multiply' }}
     />
   );
 }

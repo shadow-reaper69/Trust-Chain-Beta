@@ -407,14 +407,15 @@ export const GridScan: React.FC<GridScanProps> = ({
     const onClick = async () => {
       const nowSec = performance.now() / 1000;
       if (scanOnClick) pushScan(nowSec);
+      const win = window as unknown as { DeviceOrientationEvent?: { requestPermission?: () => Promise<string> } };
       if (
         enableGyro &&
         typeof window !== 'undefined' &&
-        (window as any).DeviceOrientationEvent &&
-        (DeviceOrientationEvent as any).requestPermission
+        win.DeviceOrientationEvent &&
+        win.DeviceOrientationEvent.requestPermission
       ) {
         try {
-          await (DeviceOrientationEvent as any).requestPermission();
+          await win.DeviceOrientationEvent.requestPermission();
         } catch {}
       }
     };
@@ -453,9 +454,9 @@ export const GridScan: React.FC<GridScanProps> = ({
     const container = containerRef.current;
     if (!container) return;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
     rendererRef.current = renderer;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(1);
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.NoToneMapping;
@@ -634,8 +635,9 @@ export const GridScan: React.FC<GridScanProps> = ({
     }
     if (bloomRef.current) {
       bloomRef.current.blendMode.opacity.value = Math.max(0, bloomIntensity);
-      (bloomRef.current as any).luminanceMaterial.threshold = bloomThreshold;
-      (bloomRef.current as any).luminanceMaterial.smoothing = bloomSmoothing;
+      const bloom = bloomRef.current as unknown as { luminanceMaterial: { threshold: number; smoothing: number } };
+      bloom.luminanceMaterial.threshold = bloomThreshold;
+      bloom.luminanceMaterial.smoothing = bloomSmoothing;
     }
     if (chromaRef.current) {
       chromaRef.current.offset.set(chromaticAberration, chromaticAberration);
@@ -778,7 +780,7 @@ export const GridScan: React.FC<GridScanProps> = ({
         }
 
         if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
-          (video as any).requestVideoFrameCallback(() => detect(performance.now()));
+          (video as unknown as { requestVideoFrameCallback: (cb: (now: number) => void) => void }).requestVideoFrameCallback(() => detect(performance.now()));
         } else {
           requestAnimationFrame(detect);
         }
@@ -789,14 +791,14 @@ export const GridScan: React.FC<GridScanProps> = ({
 
     start();
 
+    const currentVideo = videoRef.current;
     return () => {
       stop = true;
-      const video = videoRef.current;
-      if (video) {
-        const stream = video.srcObject as MediaStream | null;
+      if (currentVideo) {
+        const stream = currentVideo.srcObject as MediaStream | null;
         if (stream) stream.getTracks().forEach(t => t.stop());
-        video.pause();
-        video.srcObject = null;
+        currentVideo.pause();
+        currentVideo.srcObject = null;
       }
     };
   }, [enableWebcam, modelsReady, depthResponse]);
